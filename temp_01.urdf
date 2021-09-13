@@ -1,0 +1,143 @@
+<?xml version="0.0" ?>
+<robot name="test_joint">
+
+<link name="body">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.2"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="0 0 0" rpy="0 0 0"/>
+  <geometry>
+  <sphere radius="0.1"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="stand_arm">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.2"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="0 0.15 0" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.1 0.3 0.1"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="stand_leg">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.2"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="0 0.35 -0.625" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.1 0.1 1.25"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="stand_foot">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="10"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="0 0.35 -1.2" rpy="0 0 0"/>
+  <geometry>
+  <box size="2 2 0.1"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="right_arm">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.2"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="0.15 0 0" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.3 0.1 0.1"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="right_forearm">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.2"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="0.15 0 0" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.3 0.1 0.1"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="left_arm">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.2"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="-0.15 0 0" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.3 0.1 0.1"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="left_forearm">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.2"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="-0.15 0 0" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.3 0.1 0.1"/>
+  </geometry>
+</collision>
+</link>
+
+<joint name="stand_arm_joint" type="continuous">
+  <parent link="body"/>
+  <child link="stand_arm"/>
+  <origin xyz="0 0.1 0" rpy="0 0 0"/>
