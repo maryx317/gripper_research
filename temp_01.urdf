@@ -28,9 +28,9 @@
   <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
 </inertial>
 <collision>
-  <origin xyz="0 0.15 0" rpy="0 0 0"/>
+  <origin xyz="0 -0.45 0" rpy="0 0 0"/>
   <geometry>
-  <box size="0.1 0.3 0.1"/>
+  <box size="0.1 0.9 0.1"/>
   </geometry>
 </collision>
 </link>
@@ -45,7 +45,7 @@
   <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
 </inertial>
 <collision>
-  <origin xyz="0 0.35 -0.625" rpy="0 0 0"/>
+  <origin xyz="0 0.05 -0.625" rpy="0 0 0"/>
   <geometry>
   <box size="0.1 0.1 1.25"/>
   </geometry>
@@ -62,7 +62,7 @@
   <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
 </inertial>
 <collision>
-  <origin xyz="0 0.35 -1.2" rpy="0 0 0"/>
+  <origin xyz="0 0.05 -1.2" rpy="0 0 0"/>
   <geometry>
   <box size="2 2 0.1"/>
   </geometry>
@@ -140,4 +140,50 @@
 <joint name="stand_arm_joint" type="continuous">
   <parent link="body"/>
   <child link="stand_arm"/>
-  <origin xyz="0 0.1 0" rpy="0 0 0"/>
+  <origin xyz="0 1.0 0" rpy="0 0 0"/>
+  <axis xyz="0.5 1.25 0"/>
+</joint>
+
+<joint name="stand_leg_joint" type="continuous">
+  <parent link="stand_arm"/>
+  <child link="stand_leg"/>
+  <origin xyz="0 0 0" rpy="0 0 0"/>
+  <axis xyz="1 0 0"/>
+</joint>
+
+<joint name="stand_foot_joint" type="continuous">
+  <parent link="stand_leg"/>
+  <child link="stand_foot"/>
+  <origin xyz="0 -0.5 0" rpy="0 0 0"/>
+  <axis xyz="0 1 0"/>
+</joint>
+
+<joint name="right_joint" type="continuous">
+  <parent link="body"/>
+  <child link="right_arm"/>
+  <origin xyz="0.1 0 0" rpy="0 0 0"/>
+  <axis xyz="0 1 0"/>
+</joint>
+
+<joint name="right_forearm_joint" type="continuous">
+  <parent link="right_arm"/>
+  <child link="right_forearm"/>
+  <origin xyz="0.3 0 0" rpy="0 0.75 0"/>
+  <axis xyz="0 1 0"/>
+</joint>
+
+<joint name="left_joint" type="continuous">
+  <parent link="body"/>
+  <child link="left_arm"/>
+  <origin xyz="-0.1 0 0" rpy="0 0 0"/>
+  <axis xyz="0 1 0"/>
+</joint>
+
+<joint name="left_forearm_joint" type="continuous">
+  <parent link="left_arm"/>
+  <child link="left_forearm"/>
+  <origin xyz="-0.3 0 0" rpy="0 -0.75 0"/>
+  <axis xyz="0 1 0"/>
+</joint>
+
+</robot>

@@ -113,8 +113,13 @@ class figure():
             f.write("  <parent link=\"" + joint[1] + "\"/>\n")
             f.write("  <child link=\"" + joint[2] + "\"/>\n")
             f.write("  <origin xyz=" + vec3_str(joint[4]) + " rpy=" + vec3_str(joint[5]) + "/>\n")
-            f.write("  <axis xyz=" + vec3_str(joint[6]) + "/>\n")
-            f.write("</joint>\n")            
+
+            if (joint[3] == "continuous"):
+                f.write("  <axis xyz=" + vec3_str(joint[6]) + "/>\n")
+            elif (joint[3] == "prismatic"):
+                f.write("  <limit effort=" + "1000" + " lower=" + str(joint[6][0]) + " upper=" + str(joint[6][1]) + " velocity=" + str(joint[6][2]) + "/>")
+
+            f.write("</joint>\n")         
 
         f.write("\n")
         f.write("</robot>\n")
