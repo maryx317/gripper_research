@@ -17,10 +17,13 @@ import figures
 from random import random
 
 height = 1.2
+continuous = False
 
 def gripper():
   w = 0.1
-  arm_length = 0.9
+  arm_length = 0.5
+  if (continuous):
+    arm_length = 0.9
   length = 0.3
   fig = figures.figure("test_joint", new_inertia = 0, reset_file_count = 0)
 
@@ -35,7 +38,11 @@ def gripper():
   fig.link("left_forearm", "box", [length, w, w], 0.2, [-1 * length * 0.5, 0, 0], [0, 0, 0])
 
   fig.joint("stand_arm_joint", "body", "stand_arm", "fixed", [0,w + arm_length,0], [0, 0, 0], [0.5, 1.25, 0], [0,0,0])
-  fig.joint("stand_leg_joint", "stand_arm", "stand_leg", "continuous", [0,0,0], [0,0,0], [1,0,0], [0.5,1,0.5])
+  if (continuous):
+    fig.joint("stand_leg_joint", "stand_arm", "stand_leg", "continuous", [0,0,0], [0,0,0], [1,0,0], [0,0,0])
+  else:
+    fig.joint("stand_leg_joint", "stand_arm", "stand_leg", "prismatic", [0,0,0], [0,0,0], [0,0,1], [0,-height])
+    
   fig.joint("stand_foot_joint", "stand_leg", "stand_foot", "fixed", [0,-0.5,0], [0,0,0], [0,1,0], [0,0,0])
   fig.joint("right_joint", "body", "right_arm", "continuous", [w, 0, 0], [0, 0, 0], [0, 1, 0], [0,0,0])
   fig.joint("right_forearm_joint", "right_arm", "right_forearm", "continuous", [length, 0, 0], [0, 0.75, 0], [0, 1, 0], [0,0,0])
@@ -63,38 +70,60 @@ fig = gripper()
 figure1 = fig.create([0, 0, height], [0, 0, 0])
 
 obj = pick_up()
-rad = random() * 6.283
-dist = random() * 0.2
 
-x = math.cos(rad) * dist
-y = math.sin(rad) * dist + 0.375
+x = 0
+y = 0 
 z = 0.2
+
+if (continuous):
+  rad = random() * 6.283
+  dist = random() * 0.2
+  x = math.cos(rad) * dist
+  y = math.sin(rad) * dist + 0.375
+else:
+  x = random() * 0.5 - 0.25
+  y = random() * 0.4 - 0.2
 
 obj1 = obj.create([x,y,z], [0,0,0])
 
 t = 0
 lift_theta = 0
 lift_target = -0.5
+
 grip_theta = 0
 grip_target = 1.3
 picked_up = False
 
-for i in range (0,2500):
+lift_theta_pris = 0
+lift_target_pris = 0.5
+
+for i in range (0,2000):
   t += 0.3
 
   if (0 <= i <= 500):
-    lift_theta += lift_target / 500
-    p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 10)
+    if (continuous):
+      lift_theta += lift_target / 500
+      p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 10)
+    else:
+      lift_theta_pris += lift_target_pris / 500
+      p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
   elif (501 <= i <= 1000):
-    grip_theta += grip_target / 500
-    p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 10)
-    p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = 2)
-    p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1 * grip_theta, force = 0.8)
-  elif (lift_theta < 0):
-    lift_theta -= lift_target / 500
-    p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 20)
-    p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1 * grip_theta, force = 0.8)
-
+      grip_theta += grip_target / 500
+      if (continuous):
+        p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 10)
+      else: 
+        p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
+      p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = 2)
+      p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1 * grip_theta, force = 0.8)
+  elif (lift_theta < 0 or lift_theta_pris > 0):
+    if (continuous):
+      lift_theta -= lift_target / 500
+      p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 20)
+      p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1 * grip_theta, force = 0.8)
+    else:
+      lift_theta_pris -= lift_target_pris / 500
+      p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
+  
   if (p.getBasePositionAndOrientation(obj1)[0][2] > z):
     picked_up = True
   else:

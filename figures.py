@@ -117,7 +117,8 @@ class figure():
             if (joint[3] == "continuous"):
                 f.write("  <axis xyz=" + vec3_str(joint[6]) + "/>\n")
             if (joint[3] == "prismatic"):
-                f.write("  <limit lower=" + float_str(joint[6][0]) + " upper=" + float_str(joint[6][1]) + "/>")
+                f.write("  <limit lower=" + float_str(joint[7][0]) + " upper=" + float_str(joint[7][1]) + "/>")
+                f.write("  <axis xyz=" + vec3_str(joint[6]) + "/>\n")
 
             f.write("</joint>\n")         
 
@@ -137,7 +138,7 @@ class figure():
 
     # specify a joint for the figure
     def joint(self, joint_name, parent, child, joint_type, pos, orn, axis, limits):
-        self.joints.append([joint_name, parent, child, joint_type, pos, orn, axis])
+        self.joints.append([joint_name, parent, child, joint_type, pos, orn, axis, limits])
 
 # some examples of various segment shapes:
 
