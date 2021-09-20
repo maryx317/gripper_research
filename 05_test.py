@@ -68,36 +68,18 @@ dist = random() * 0.2
 
 x = math.cos(rad) * dist
 y = math.sin(rad) * dist + 0.375
+z = 0.2
 
-obj1 = obj.create([x,y,0.2], [0,0,0])
+obj1 = obj.create([x,y,z], [0,0,0])
 
-# p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = -0.7234, maxVelocity = 1.5)
-
-# for i in range(100):
-#   p.stepSimulation()
-#   time.sleep(1./240.)
-
-# p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = 1.2, maxVelocity = 1.5)
-# p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1.2, maxVelocity = 1.5)
-
-# for i in range(101, 350):
-#   p.stepSimulation()
-#   time.sleep(1./240.)
-
-# p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = 0, maxVelocity = 1.5)
-
-# for i in range(351, 3000):
-#   p.stepSimulation()
-#   time.sleep(1./240.)
-
-# single loop for i and see where i is to see what joint to control
 t = 0
 lift_theta = 0
 lift_target = -0.5
 grip_theta = 0
 grip_target = 1.3
+picked_up = False
 
-for i in range (0,5000):
+for i in range (0,2500):
   t += 0.3
 
   if (0 <= i <= 500):
@@ -113,17 +95,22 @@ for i in range (0,5000):
     p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 20)
     p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1 * grip_theta, force = 0.8)
 
+  if (p.getBasePositionAndOrientation(obj1)[0][2] > z):
+    picked_up = True
+  else:
+    picked_up = False
+
   p.stepSimulation()
   time.sleep(1./240.)
 
-# p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = theta1, maxVelocity = 0, force = -0.8)
+print("")
+print("***** RESULT *****")
 
-# for i in range (501,5000):
-#   theta = 0.4 * math.sin (t * 0.08) + 0.75
-#   t += 0.3
-#   p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = theta, force = 0.8)
-#   p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1 * theta, force = 0.8)
-#   p.stepSimulation()
-#   time.sleep(1./240.)
+if (picked_up):
+  print("SUCCESS: Object successfully picked up!")
+else:
+  print("FAILED: Object unsuccessfully picked up...")
+
+print("")
 
 p.disconnect()

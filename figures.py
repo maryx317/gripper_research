@@ -117,7 +117,7 @@ class figure():
             if (joint[3] == "continuous"):
                 f.write("  <axis xyz=" + vec3_str(joint[6]) + "/>\n")
             if (joint[3] == "prismatic"):
-                f.write("  <limit lower=" + str(joint[6][0]) + " upper=" + str(joint[6][1]) + "/>")
+                f.write("  <limit lower=" + float_str(joint[6][0]) + " upper=" + float_str(joint[6][1]) + "/>")
 
             f.write("</joint>\n")         
 
