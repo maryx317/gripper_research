@@ -116,8 +116,8 @@ class figure():
 
             if (joint[3] == "continuous"):
                 f.write("  <axis xyz=" + vec3_str(joint[6]) + "/>\n")
-            elif (joint[3] == "prismatic"):
-                f.write("  <limit effort=" + "1000" + " lower=" + str(joint[6][0]) + " upper=" + str(joint[6][1]) + " velocity=" + str(joint[6][2]) + "/>")
+            if (joint[3] == "prismatic"):
+                f.write("  <limit lower=" + str(joint[6][0]) + " upper=" + str(joint[6][1]) + "/>")
 
             f.write("</joint>\n")         
 
@@ -136,7 +136,7 @@ class figure():
         self.bodies.append([link_name, geom, size, mass, pos, orn])
 
     # specify a joint for the figure
-    def joint(self, joint_name, parent, child, joint_type, pos, orn, axis):
+    def joint(self, joint_name, parent, child, joint_type, pos, orn, axis, limits):
         self.joints.append([joint_name, parent, child, joint_type, pos, orn, axis])
 
 # some examples of various segment shapes:

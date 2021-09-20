@@ -45,9 +45,9 @@
   <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
 </inertial>
 <collision>
-  <origin xyz="0 0.05 -0.625" rpy="0 0 0"/>
+  <origin xyz="0 0.05 -0.6" rpy="0 0 0"/>
   <geometry>
-  <box size="0.1 0.1 1.25"/>
+  <box size="0.1 0.1 1.2"/>
   </geometry>
 </collision>
 </link>
@@ -62,7 +62,7 @@
   <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
 </inertial>
 <collision>
-  <origin xyz="0 0.05 -1.2" rpy="0 0 0"/>
+  <origin xyz="0 0.05 -1.15" rpy="0 0 0"/>
   <geometry>
   <box size="2 2 0.1"/>
   </geometry>
@@ -137,11 +137,10 @@
 </collision>
 </link>
 
-<joint name="stand_arm_joint" type="continuous">
+<joint name="stand_arm_joint" type="fixed">
   <parent link="body"/>
   <child link="stand_arm"/>
   <origin xyz="0 1.0 0" rpy="0 0 0"/>
-  <axis xyz="0.5 1.25 0"/>
 </joint>
 
 <joint name="stand_leg_joint" type="continuous">
@@ -151,11 +150,10 @@
   <axis xyz="1 0 0"/>
 </joint>
 
-<joint name="stand_foot_joint" type="continuous">
+<joint name="stand_foot_joint" type="fixed">
   <parent link="stand_leg"/>
   <child link="stand_foot"/>
   <origin xyz="0 -0.5 0" rpy="0 0 0"/>
-  <axis xyz="0 1 0"/>
 </joint>
 
 <joint name="right_joint" type="continuous">

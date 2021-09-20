@@ -1,14 +1,22 @@
 # meters kilograms seconds
 # cm grams seconds
 
+# pybullet forum
+# look at existing urdf files given on installation
+  # use grep to easily search for prismatic in a file "grep -i"
+# do random horizontal positioning for the sphere and box being picked up
+# do something in the code to return whether the ball has been picked up even after a long time in the air
+# wait to do modification on the gripper until after these are done
+
 import pybullet as p
 import time
 import math
 import random
 import numpy as np
 import figures
+from random import random
 
-height = 1.25
+height = 1.2
 
 def gripper():
   w = 0.1
@@ -19,20 +27,20 @@ def gripper():
   fig.link("body", "sphere", w, 0.2, [0, 0, 0], [0, 0, 0])
 
   fig.link("stand_arm", "box", [w, arm_length, w], 0.2, [0, -arm_length * 0.5, 0], [0, 0, 0])
-  fig.link("stand_leg", "box", [w, w, 1.25], 0.2, [0, w * 0.5, -0.625], [0,0,0])
-  fig.link("stand_foot", "box", [2,2,w], 10, [0, w * 0.5, -1.25 + w * 0.5], [0,0,0])
+  fig.link("stand_leg", "box", [w, w, height], 0.2, [0, w * 0.5, -height/ 2], [0,0,0])
+  fig.link("stand_foot", "box", [2,2,w], 10, [0, w * 0.5, -height + w * 0.5], [0,0,0])
   fig.link("right_arm", "box", [length, w, w], 0.2, [length * 0.5, 0, 0], [0, 0, 0])
   fig.link("right_forearm", "box", [length, w, w], 0.2, [length * 0.5, 0, 0], [0, 0, 0])
   fig.link("left_arm", "box", [length, w, w], 0.2, [-1 * length * 0.5, 0, 0], [0, 0, 0])
   fig.link("left_forearm", "box", [length, w, w], 0.2, [-1 * length * 0.5, 0, 0], [0, 0, 0])
 
-  fig.joint("stand_arm_joint", "body", "stand_arm", "continuous", [0,w + arm_length,0], [0, 0, 0], [0.5, 1.25, 0])
-  fig.joint("stand_leg_joint", "stand_arm", "stand_leg", "continuous", [0,0,0], [0,0,0], [1,0,0])# [0.5,1,0.5])
-  fig.joint("stand_foot_joint", "stand_leg", "stand_foot", "continuous", [0,-0.5,0], [0,0,0], [0,1,0])
-  fig.joint("right_joint", "body", "right_arm", "continuous", [w, 0, 0], [0, 0, 0], [0, 1, 0])
-  fig.joint("right_forearm_joint", "right_arm", "right_forearm", "continuous", [length, 0, 0], [0, 0.75, 0], [0, 1, 0])
-  fig.joint("left_joint", "body", "left_arm", "continuous", [-w, 0, 0], [0, 0, 0], [0, 1, 0])
-  fig.joint("left_forearm_joint", "left_arm", "left_forearm", "continuous", [-length, 0, 0], [0, -0.75, 0], [0, 1, 0])
+  fig.joint("stand_arm_joint", "body", "stand_arm", "fixed", [0,w + arm_length,0], [0, 0, 0], [0.5, 1.25, 0], [0,0,0])
+  fig.joint("stand_leg_joint", "stand_arm", "stand_leg", "continuous", [0,0,0], [0,0,0], [1,0,0], [0.5,1,0.5])
+  fig.joint("stand_foot_joint", "stand_leg", "stand_foot", "fixed", [0,-0.5,0], [0,0,0], [0,1,0], [0,0,0])
+  fig.joint("right_joint", "body", "right_arm", "continuous", [w, 0, 0], [0, 0, 0], [0, 1, 0], [0,0,0])
+  fig.joint("right_forearm_joint", "right_arm", "right_forearm", "continuous", [length, 0, 0], [0, 0.75, 0], [0, 1, 0], [0,0,0])
+  fig.joint("left_joint", "body", "left_arm", "continuous", [-w, 0, 0], [0, 0, 0], [0, 1, 0], [0,0,0])
+  fig.joint("left_forearm_joint", "left_arm", "left_forearm", "continuous", [-length, 0, 0], [0, -0.75, 0], [0, 1, 0], [0,0,0])
 
   return fig
 
@@ -55,35 +63,58 @@ fig = gripper()
 figure1 = fig.create([0, 0, height], [0, 0, 0])
 
 obj = pick_up()
-obj1 = obj.create([0,0.55,0.2], [0,0,0])
+rad = random() * 6.283
+dist = random() * 0.2
 
-p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = -0.7234, maxVelocity = 1.5)
+x = math.cos(rad) * dist
+y = math.sin(rad) * dist + 0.375
 
-for i in range(100):
-  p.stepSimulation()
-  time.sleep(1./240.)
+obj1 = obj.create([x,y,0.2], [0,0,0])
 
-p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = 1.2, maxVelocity = 1.5)
-p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1.2, maxVelocity = 1.5)
+# p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = -0.7234, maxVelocity = 1.5)
 
-for i in range(101, 350):
-  p.stepSimulation()
-  time.sleep(1./240.)
-
-p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = 0, maxVelocity = 1.5)
-
-for i in range(351, 3000):
-  p.stepSimulation()
-  time.sleep(1./240.)
-
-# t = 0
-# theta1 = 0
-# for i in range (500):
-#   theta1 = 0.4 * math.sin (t * 0.08) + 0.75
-#   t += 0.3
-#   p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = theta1, force = 0.8)
+# for i in range(100):
 #   p.stepSimulation()
 #   time.sleep(1./240.)
+
+# p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = 1.2, maxVelocity = 1.5)
+# p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1.2, maxVelocity = 1.5)
+
+# for i in range(101, 350):
+#   p.stepSimulation()
+#   time.sleep(1./240.)
+
+# p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = 0, maxVelocity = 1.5)
+
+# for i in range(351, 3000):
+#   p.stepSimulation()
+#   time.sleep(1./240.)
+
+# single loop for i and see where i is to see what joint to control
+t = 0
+lift_theta = 0
+lift_target = -0.5
+grip_theta = 0
+grip_target = 1.3
+
+for i in range (0,5000):
+  t += 0.3
+
+  if (0 <= i <= 500):
+    lift_theta += lift_target / 500
+    p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 10)
+  elif (501 <= i <= 1000):
+    grip_theta += grip_target / 500
+    p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 10)
+    p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = 2)
+    p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1 * grip_theta, force = 0.8)
+  elif (lift_theta < 0):
+    lift_theta -= lift_target / 500
+    p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 20)
+    p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1 * grip_theta, force = 0.8)
+
+  p.stepSimulation()
+  time.sleep(1./240.)
 
 # p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = theta1, maxVelocity = 0, force = -0.8)
 
