@@ -1,12 +1,10 @@
 # meters kilograms seconds
 # cm grams seconds
 
-# pybullet forum
-# look at existing urdf files given on installation
-  # use grep to easily search for prismatic in a file "grep -i"
-# do random horizontal positioning for the sphere and box being picked up
-# do something in the code to return whether the ball has been picked up even after a long time in the air
-# wait to do modification on the gripper until after these are done
+# create outer loop with many different trials to see how robust something is. 
+  # One gripper and running it again and again. Take out time.sleep(). Have option for without showing the result
+  # aim for 100 loops
+# try a few different gripper geometries
 
 import pybullet as p
 import time
