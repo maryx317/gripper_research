@@ -1,10 +1,12 @@
 # meters kilograms seconds
 # cm grams seconds
 
-# create outer loop with many different trials to see how robust something is. 
-  # One gripper and running it again and again. Take out time.sleep(). Have option for without showing the result
-  # aim for 100 loops
-# try a few different gripper geometries
+# figure out joint limits and add gripper parameters
+  # add the effort and velocity parameters for prismatic joints
+  # test it out with a very simple prismatic joint with a mouse to push another mouse onto it
+# make a 2D contact point pad
+# use for loops and variables to make things more flexible in the future
+# try picking up a cylinder as well as sphere
 
 import pybullet as p
 import time
@@ -23,7 +25,7 @@ def gripper():
   if (continuous):
     arm_length = 0.9
   length = 0.3
-  fig = figures.figure("test_joint", new_inertia = 0, reset_file_count = 0)
+  fig = figures.figure("test_joint", new_inertia = 0, reset_file_count = 1)
 
   fig.link("body", "sphere", w, 0.2, [0, 0, 0], [0, 0, 0])
 
@@ -43,101 +45,149 @@ def gripper():
     
   fig.joint("stand_foot_joint", "stand_leg", "stand_foot", "fixed", [0,-0.5,0], [0,0,0], [0,1,0], [0,0,0])
   fig.joint("right_joint", "body", "right_arm", "continuous", [w, 0, 0], [0, 0, 0], [0, 1, 0], [0,0,0])
-  fig.joint("right_forearm_joint", "right_arm", "right_forearm", "continuous", [length, 0, 0], [0, 0.75, 0], [0, 1, 0], [0,0,0])
+  fig.joint("right_forearm_joint", "right_arm", "right_forearm", "fixed", [length, 0, 0], [0, 0.75, 0], [0, 1, 0], [0,0,0])
   fig.joint("left_joint", "body", "left_arm", "continuous", [-w, 0, 0], [0, 0, 0], [0, 1, 0], [0,0,0])
-  fig.joint("left_forearm_joint", "left_arm", "left_forearm", "continuous", [-length, 0, 0], [0, -0.75, 0], [0, 1, 0], [0,0,0])
+  fig.joint("left_forearm_joint", "left_arm", "left_forearm", "fixed", [-length, 0, 0], [0, -0.75, 0], [0, 1, 0], [0,0,0])
+
+  fig.link("left_contact_1", "box", [w/2, w, 0.2], 0.2, [0, 0, 0], [0,0,0])
+  fig.link("left_contact_2", "box", [w/2, w, 0.2], 0.2, [0, 0, 0], [0,0,0])
+  fig.link("left_contact_3", "box", [w/2, w, 0.2], 0.2, [0, 0, 0], [0,0,0])
+  fig.link("left_contact_4", "box", [w/2, w, 0.2], 0.2, [0, 0, 0], [0,0,0])
+
+  fig.link("right_contact_1", "box", [w/2, w, 0.2], 0.2, [0, 0, 0], [0,0,0])
+  fig.link("right_contact_2", "box", [w/2, w, 0.2], 0.2, [0, 0, 0], [0,0,0])
+  fig.link("right_contact_3", "box", [w/2, w, 0.2], 0.2, [0, 0, 0], [0,0,0])
+  fig.link("right_contact_4", "box", [w/2, w, 0.2], 0.2, [0, 0, 0], [0,0,0])
+
+  fig.joint("left_joint_1", "left_forearm", "left_contact_1", "prismatic", [-length, 0, -w], [0,0,0], [0,0,1], [0,1])
+  fig.joint("left_joint_2", "left_forearm", "left_contact_2", "prismatic", [-length + w/2, 0, -w], [0,0,0], [0,0,1], [0,1])
+  fig.joint("left_joint_3", "left_forearm", "left_contact_3", "prismatic", [-length + w, 0, -w], [0,0,0], [0,0,1], [0,1])
+  fig.joint("left_joint_4", "left_forearm", "left_contact_4", "prismatic", [-length + w + w/2, 0, -w], [0,0,0], [0,0,0], [0,1])
+
+  fig.joint("right_joint_1", "right_forearm", "right_contact_1", "prismatic", [length, 0, -0.1], [0,0,0], [0,0,1], [0,1])
+  fig.joint("right_joint_2", "right_forearm", "right_contact_2", "prismatic", [length - w/2, 0, -0.1], [0,0,0], [0,0,1], [0,1])
+  fig.joint("right_joint_3", "right_forearm", "right_contact_3", "prismatic", [length - w, 0, -0.1], [0,0,0], [0,0,1], [0,1])
+  fig.joint("right_joint_4", "right_forearm", "right_contact_4", "prismatic", [length - w - w/2, 0, -0.1], [0,0,0], [0,0,1], [0,1])
 
   return fig
 
 def pick_up():
   obj = figures.figure("test_obj", reset_file_count = 0)
-  # obj.link("obj_body", "sphere", 0.2, 0.2, [0, 0, 0.1], [0, 0, 0]) 
-  obj.link("obj_body", "box", [0.3,0.3,0.3], 0.2, [0, 0, 0.1], [0, 0, 0])
+  obj.link("obj_body", "sphere", 0.2, 0.2, [0, 0, 0.1], [0, 0, 0]) 
+  # obj.link("obj_body", "box", [0.3,0.3,0.3], 0.2, [0, 0, 0.1], [0, 0, 0])
   return obj
 
-physicsClient = p.connect(p.GUI)
-p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
-p.resetDebugVisualizerCamera(cameraDistance=1.2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
+physicsClient = p.connect(p.DIRECT)
 
-p.setGravity(0,0,-10)
+# physicsClient = p.connect(p.GUI)
+# p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
+# p.resetDebugVisualizerCamera(cameraDistance=1.2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
 
-plane_id = p.createCollisionShape(p.GEOM_PLANE);
-my_plane = p.createMultiBody(baseMass = 0, baseCollisionShapeIndex = plane_id, baseVisualShapeIndex = -1)
+iterations = 10
+success = 0
+failure = 0
 
-fig = gripper()
-figure1 = fig.create([0, 0, height], [0, 0, 0])
+while iterations > 0:
+  p.resetSimulation()
+  p.setGravity(0,0,-10)
 
-obj = pick_up()
+  plane_id = p.createCollisionShape(p.GEOM_PLANE);
+  my_plane = p.createMultiBody(baseMass = 0, baseCollisionShapeIndex = plane_id, baseVisualShapeIndex = -1)
 
-x = 0
-y = 0 
-z = 0.2
+  fig = gripper()
+  figure1 = fig.create([0, 0, height], [0, 0, 0])
 
-if (continuous):
-  rad = random() * 6.283
-  dist = random() * 0.2
-  x = math.cos(rad) * dist
-  y = math.sin(rad) * dist + 0.375
-else:
-  x = random() * 0.5 - 0.25
-  y = random() * 0.4 - 0.2
+  obj = pick_up()
 
-obj1 = obj.create([x,y,z], [0,0,0])
+  x = 0
+  y = 0 
+  z = 0.2
 
-t = 0
-lift_theta = 0
-lift_target = -0.5
+  if (continuous):
+    rad = random() * 6.283
+    dist = random() * 0.2
+    x = math.cos(rad) * dist
+    y = math.sin(rad) * dist + 0.375
+  else:
+    x = random() * 0.5 - 0.25
+    y = random() * 0.4 - 0.2
 
-grip_theta = 0
-grip_target = 1.3
-picked_up = False
+  obj1 = obj.create([x,y,z], [0,0,0])
 
-lift_theta_pris = 0
-lift_target_pris = 0.5
+  t = 0
+  lift_theta = 0
+  lift_target = -0.5
 
-for i in range (0,2000):
-  t += 0.3
+  grip_theta = 0
+  grip_target = 2
+  picked_up = False
 
-  if (0 <= i <= 500):
-    if (continuous):
-      lift_theta += lift_target / 500
-      p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 10)
-    else:
-      lift_theta_pris += lift_target_pris / 500
-      p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
-  elif (501 <= i <= 1000):
-      grip_theta += grip_target / 500
+  lift_theta_pris = 0
+  lift_target_pris = 0.5
+
+  for i in range (0,2000):
+    t += 0.3
+
+    if (0 <= i <= 500):
       if (continuous):
+        lift_theta += lift_target / 500
         p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 10)
-      else: 
+      else:
+        lift_theta_pris += lift_target_pris / 500
         p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
-      p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = 2)
-      p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1 * grip_theta, force = 0.8)
-  elif (lift_theta < 0 or lift_theta_pris > 0):
-    if (continuous):
-      lift_theta -= lift_target / 500
-      p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 20)
-      p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1 * grip_theta, force = 0.8)
-    else:
-      lift_theta_pris -= lift_target_pris / 500
-      p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
-  
-  if (p.getBasePositionAndOrientation(obj1)[0][2] > z):
+    elif (501 <= i <= 1000):
+        grip_theta += grip_target / 500
+        if (continuous):
+          p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 10)
+        else: 
+          p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
+          p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = 2)
+          p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1 * grip_theta, force = 0.8)
+
+          p.setJointMotorControl2(figure1, 7, p.POSITION_CONTROL, force = 1)
+          p.setJointMotorControl2(figure1, 8, p.POSITION_CONTROL, force = 1)
+          p.setJointMotorControl2(figure1, 9, p.POSITION_CONTROL, force = 1)
+          p.setJointMotorControl2(figure1, 10, p.POSITION_CONTROL, force = 1)
+
+          p.setJointMotorControl2(figure1, 11, p.POSITION_CONTROL, force = 1)
+          p.setJointMotorControl2(figure1, 12, p.POSITION_CONTROL, force = 1)
+          p.setJointMotorControl2(figure1, 13, p.POSITION_CONTROL, force = 1)
+          p.setJointMotorControl2(figure1, 14, p.POSITION_CONTROL, force = 1)
+    elif (lift_theta < 0 or lift_theta_pris > 0):
+      if (continuous):
+        lift_theta -= lift_target / 500
+        p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 20)
+        p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -1 * grip_theta, force = 0.8)
+      else:
+        lift_theta_pris -= lift_target_pris / 500
+        p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
+
+    p.stepSimulation()
+    # time.sleep(1./10000.)
+    # time.sleep(1./240.)
+
+  if (p.getBasePositionAndOrientation(obj1)[0][2] > z + 0.1):
     picked_up = True
+    success += 1
   else:
     picked_up = False
+    failure += 1
+  
+  # print("")
+  # print("***** RESULT *****")
 
-  p.stepSimulation()
-  time.sleep(1./240.)
+  # if (picked_up):
+  #   print("SUCCESS: Object successfully picked up!")
+  # else:
+  #   print("FAILED: Object unsuccessfully picked up...")
+
+  # print("")
+
+  iterations -= 1
 
 print("")
-print("***** RESULT *****")
-
-if (picked_up):
-  print("SUCCESS: Object successfully picked up!")
-else:
-  print("FAILED: Object unsuccessfully picked up...")
-
+print("***** SUCCESS RATE *****")
+print(str(success/(success + failure)))
 print("")
 
 p.disconnect()
