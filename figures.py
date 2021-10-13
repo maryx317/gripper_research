@@ -107,7 +107,14 @@ class figure():
             f.write("</collision>\n")            
             f.write("</link>\n")
 
+        i = 0 
+        # print("-----------------------------")
+        # print("")
         for joint in self.joints:
+            # print(str(i) + ": " + str(joint))
+            # print("")
+            i += 1
+
             f.write("\n")
             f.write("<joint name=\"" + joint[0] + "\" type=\"" + joint[3] + "\">\n")
             f.write("  <parent link=\"" + joint[1] + "\"/>\n")
@@ -117,8 +124,9 @@ class figure():
             if (joint[3] == "continuous"):
                 f.write("  <axis xyz=" + vec3_str(joint[6]) + "/>\n")
             if (joint[3] == "prismatic"):
-                f.write("  <limit lower=" + float_str(joint[7][0]) + " upper=" + float_str(joint[7][1]) + "/>")
+                f.write("  <limit effort=" + float_str(joint[7][2]) + "lower=" + float_str(joint[7][0]) + " upper=" + float_str(joint[7][1]) + "/>")
                 f.write("  <axis xyz=" + vec3_str(joint[6]) + "/>\n")
+                f.write("  <dynamics damping=" + float_str(joint[7][3]) + "friction=" + float_str(joint[7][4]) + "/>")
 
             f.write("</joint>\n")         
 
