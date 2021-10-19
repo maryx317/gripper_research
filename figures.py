@@ -108,11 +108,11 @@ class figure():
             f.write("</link>\n")
 
         i = 0 
-        # print("-----------------------------")
-        # print("")
+        print("-----------------------------")
+        print("")
         for joint in self.joints:
-            # print(str(i) + ": " + str(joint))
-            # print("")
+            print(str(i) + ": " + str(joint))
+            print("")
             i += 1
 
             f.write("\n")

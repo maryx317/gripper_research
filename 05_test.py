@@ -1,6 +1,8 @@
 # meters kilograms seconds
 # cm grams seconds
 
+# pad: 2 | effort: 2 | success: 88%
+
 # debug gripper
 # look at damping and friction for prismatic joints
 # optimization: 
@@ -61,11 +63,11 @@ class gripper():
         
     fig.joint("stand_foot_joint", "stand_leg", "stand_foot", "fixed", [0,-0.5,0], [0,0,0], [0,1,0], [0,0,0])
 
+    fig.joint("left_joint", "body", "left_arm", "continuous", [-w, 0, 0], [0, 0, 0], [0, -1, 0], [0,0,0])
+    fig.joint("left_forearm_joint", "left_arm", "left_forearm", "fixed", [-length, 0, 0], [0, -0.75, 0], [0, 1, 0], [0,0,0])
+
     fig.joint("right_joint", "body", "right_arm", "continuous", [w, 0, 0], [0, 0, 0], [0, 1, 0], [0,0,0])
     fig.joint("right_forearm_joint", "right_arm", "right_forearm", "fixed", [length, 0, 0], [0, 0.75, 0], [0, 1, 0], [0,0,0])
-
-    fig.joint("left_joint", "body", "left_arm", "continuous", [-w, 0, 0], [0, 0, 0], [0, 1, 0], [0,0,0])
-    fig.joint("left_forearm_joint", "left_arm", "left_forearm", "fixed", [-length, 0, 0], [0, -0.75, 0], [0, 1, 0], [0,0,0])
 
     if (self.use_units):
       weight = 0.64 / self.num_units
@@ -115,7 +117,7 @@ success = 0
 failure = 0
 
 iteration = 0
-pad_size = 0
+pad_size = 1
 effort = 0
 
 best_size = 0
@@ -133,11 +135,11 @@ while pad_size <= 4:
     print("effort: " + str(effort))
     print("-")
     
-    physicsClient = p.connect(p.DIRECT)
+    # physicsClient = p.connect(p.DIRECT)
 
-    # physicsClient = p.connect(p.GUI)
-    # p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
-    # p.resetDebugVisualizerCamera(cameraDistance=1.2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
+    physicsClient = p.connect(p.GUI)
+    p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
+    p.resetDebugVisualizerCamera(cameraDistance=1.2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
 
     while iteration < iterations:
       # if (iteration % 10 == 0):
@@ -169,7 +171,7 @@ while pad_size <= 4:
         x = random() * 0.5 - 0.25
         y = random() * 0.4 - 0.2
 
-      obj1 = obj.create([x,y,z], [0,0,0])
+      obj1 = obj.create([0,0,z], [0,0,0])
 
       t = 0
       lift_theta = 0
@@ -199,11 +201,11 @@ while pad_size <= 4:
             if (continuous):
               p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 100)
               p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
-              p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -grip_theta, force = 100)
+              p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
             else: 
               p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
               p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
-              p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -grip_theta, force = pad_gripper.arm_effort)
+              p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
 
               if (pad_gripper.use_units):
                 n = 0
@@ -212,20 +214,20 @@ while pad_size <= 4:
                   unit_l = 7 + n + 1
 
                   force_l = pad_gripper.effort_limit * 3
-                  p.setJointMotorControl2(figure1, unit_r, p.POSITION_CONTROL, force = pad_gripper.effort_limit)
-                  p.setJointMotorControl2(figure1, unit_l, p.POSITION_CONTROL, force = pad_gripper.effort_limit)
+                  # p.setJointMotorControl2(figure1, unit_r, p.POSITION_CONTROL, force = pad_gripper.effort_limit)
+                  # p.setJointMotorControl2(figure1, unit_l, p.POSITION_CONTROL, force = pad_gripper.effort_limit)
                   n += 2 
         elif (lift_theta < 0 or lift_theta_pris > 0):
           if (continuous):
             lift_theta -= lift_target / 500
             p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 100)
             p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
-            p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -grip_theta, force = 100)
+            p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
           else:
             lift_theta_pris -= lift_target_pris / 500
             p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
             p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
-            p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = -grip_theta, force = pad_gripper.arm_effort)
+            p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
 
             if (pad_gripper.use_units):
               n = 0
@@ -239,7 +241,7 @@ while pad_size <= 4:
 
         p.stepSimulation()
         # time.sleep(1./10000.)
-        # time.sleep(1./240.)
+        time.sleep(1./1000.)
 
       if (p.getBasePositionAndOrientation(obj1)[0][2] > z + 0.1):
         picked_up = True
