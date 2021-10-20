@@ -137,6 +137,142 @@
 </collision>
 </link>
 
+<link name="right_contact_00">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.08"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="-0.05 -0.05 -0.1" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.1 0.1 0.2"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="left_contact_00">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.08"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="0.05 -0.05 -0.1" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.1 0.1 0.2"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="right_contact_01">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.08"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="-0.05 -0.05 -0.1" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.1 0.1 0.2"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="left_contact_01">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.08"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="0.05 -0.05 -0.1" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.1 0.1 0.2"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="right_contact_10">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.08"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="-0.05 -0.05 -0.1" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.1 0.1 0.2"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="left_contact_10">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.08"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="0.05 -0.05 -0.1" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.1 0.1 0.2"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="right_contact_11">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.08"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="-0.05 -0.05 -0.1" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.1 0.1 0.2"/>
+  </geometry>
+</collision>
+</link>
+
+<link name="left_contact_11">
+<contact>
+  <lateral_friction value="1.0"/>
+  <inertia_scaling value="1.0"/>
+</contact>
+<inertial>
+  <mass value="0.08"/>
+  <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+</inertial>
+<collision>
+  <origin xyz="0.05 -0.05 -0.1" rpy="0 0 0"/>
+  <geometry>
+  <box size="0.1 0.1 0.2"/>
+  </geometry>
+</collision>
+</link>
+
 <joint name="stand_arm_joint" type="fixed">
   <parent link="body"/>
   <child link="stand_arm"/>
@@ -156,6 +292,19 @@
   <origin xyz="0 -0.5 0" rpy="0 0 0"/>
 </joint>
 
+<joint name="right_joint" type="continuous">
+  <parent link="body"/>
+  <child link="right_arm"/>
+  <origin xyz="0.1 0 0" rpy="0 0 0"/>
+  <axis xyz="0 1 0"/>
+</joint>
+
+<joint name="right_forearm_joint" type="fixed">
+  <parent link="right_arm"/>
+  <child link="right_forearm"/>
+  <origin xyz="0.3 0 0" rpy="0 0.75 0"/>
+</joint>
+
 <joint name="left_joint" type="continuous">
   <parent link="body"/>
   <child link="left_arm"/>
@@ -169,17 +318,60 @@
   <origin xyz="-0.3 0 0" rpy="0 -0.75 0"/>
 </joint>
 
-<joint name="right_joint" type="continuous">
-  <parent link="body"/>
-  <child link="right_arm"/>
-  <origin xyz="0.1 0 0" rpy="0 0 0"/>
-  <axis xyz="0 1 0"/>
-</joint>
+<joint name="right_joint_00" type="prismatic">
+  <parent link="right_forearm"/>
+  <child link="right_contact_00"/>
+  <origin xyz="0.3 0.0 -0.05" rpy="0 0 0"/>
+  <limit effort="1.609458942641988"lower="0" upper="0.07"/>  <axis xyz="0 0 1"/>
+  <dynamics damping="0.5"friction="0.5"/></joint>
 
-<joint name="right_forearm_joint" type="fixed">
-  <parent link="right_arm"/>
-  <child link="right_forearm"/>
-  <origin xyz="0.3 0 0" rpy="0 0.75 0"/>
-</joint>
+<joint name="left_joint_00" type="prismatic">
+  <parent link="left_forearm"/>
+  <child link="left_contact_00"/>
+  <origin xyz="-0.3 0.0 -0.05" rpy="0 0 0"/>
+  <limit effort="1.609458942641988"lower="0" upper="0.07"/>  <axis xyz="0 0 1"/>
+  <dynamics damping="0.5"friction="0.5"/></joint>
+
+<joint name="right_joint_01" type="prismatic">
+  <parent link="right_forearm"/>
+  <child link="right_contact_01"/>
+  <origin xyz="0.3 0.1 -0.05" rpy="0 0 0"/>
+  <limit effort="1.609458942641988"lower="0" upper="0.07"/>  <axis xyz="0 0 1"/>
+  <dynamics damping="0.5"friction="0.5"/></joint>
+
+<joint name="left_joint_01" type="prismatic">
+  <parent link="left_forearm"/>
+  <child link="left_contact_01"/>
+  <origin xyz="-0.3 0.1 -0.05" rpy="0 0 0"/>
+  <limit effort="1.609458942641988"lower="0" upper="0.07"/>  <axis xyz="0 0 1"/>
+  <dynamics damping="0.5"friction="0.5"/></joint>
+
+<joint name="right_joint_10" type="prismatic">
+  <parent link="right_forearm"/>
+  <child link="right_contact_10"/>
+  <origin xyz="0.19999999999999998 0.0 -0.05" rpy="0 0 0"/>
+  <limit effort="1.609458942641988"lower="0" upper="0.07"/>  <axis xyz="0 0 1"/>
+  <dynamics damping="0.5"friction="0.5"/></joint>
+
+<joint name="left_joint_10" type="prismatic">
+  <parent link="left_forearm"/>
+  <child link="left_contact_10"/>
+  <origin xyz="-0.19999999999999998 0.0 -0.05" rpy="0 0 0"/>
+  <limit effort="1.609458942641988"lower="0" upper="0.07"/>  <axis xyz="0 0 1"/>
+  <dynamics damping="0.5"friction="0.5"/></joint>
+
+<joint name="right_joint_11" type="prismatic">
+  <parent link="right_forearm"/>
+  <child link="right_contact_11"/>
+  <origin xyz="0.19999999999999998 0.1 -0.05" rpy="0 0 0"/>
+  <limit effort="1.609458942641988"lower="0" upper="0.07"/>  <axis xyz="0 0 1"/>
+  <dynamics damping="0.5"friction="0.5"/></joint>
+
+<joint name="left_joint_11" type="prismatic">
+  <parent link="left_forearm"/>
+  <child link="left_contact_11"/>
+  <origin xyz="-0.19999999999999998 0.1 -0.05" rpy="0 0 0"/>
+  <limit effort="1.609458942641988"lower="0" upper="0.07"/>  <axis xyz="0 0 1"/>
+  <dynamics damping="0.5"friction="0.5"/></joint>
 
 </robot>
