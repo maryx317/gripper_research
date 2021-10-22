@@ -128,8 +128,8 @@ def cma_optimization(iters, num_params, cma_opts):
   r = es.result
   return(r[0], r[1])
 
-def optimization(efforts):
-  iterations = 50
+def optimization(params, iterations = 50, gui = False, random_pos = True):
+  iterations = iterations
   success = 0
   failure = 0
 
@@ -148,7 +148,7 @@ def optimization(efforts):
     my_plane = p.createMultiBody(baseMass = 0, baseCollisionShapeIndex = plane_id, baseVisualShapeIndex = -1)
 
     pad_gripper = 0
-    pad_gripper = gripper(pad_size,pad_size,0,0.07,efforts[0],efforts[1],0.5,0.5)
+    pad_gripper = gripper(params[2],params[2],0,0.07,params[0],params[1],0.5,0.5)
     fig = pad_gripper.make()
     figure1 = fig.create([0, 0, height], [0, 0, 0])
 
@@ -166,6 +166,10 @@ def optimization(efforts):
     else:
       x = random() * 0.5 - 0.25
       y = random() * 0.4 - 0.2
+
+    if not random_pos:
+      x = 0
+      y = 0
 
     obj1 = obj.create([x,y,z], [0,0,0])
 
@@ -236,8 +240,9 @@ def optimization(efforts):
               n += 2 
 
       p.stepSimulation()
-      # time.sleep(1./10000.)
-      # time.sleep(1./1000.)
+      if gui:
+        # time.sleep(1./10000.)
+        time.sleep(1./240.)
 
     if (p.getBasePositionAndOrientation(obj1)[0][2] > z + 0.1):
       picked_up = True
@@ -254,16 +259,24 @@ def optimization(efforts):
   # print("-----")
   # print("Success rate: " + str(success_rate))
 
-physicsClient = p.connect(p.DIRECT)
+# physicsClient = p.connect(p.DIRECT)
 
-# physicsClient = p.connect(p.GUI)
-# p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
-# p.resetDebugVisualizerCamera(cameraDistance=1.2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
+physicsClient = p.connect(p.GUI)
+p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
+p.resetDebugVisualizerCamera(cameraDistance=1.2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
 
-cma_opts = {'BoundaryHandler': cma.BoundTransform, 'bounds': [0, 10]}
-result = cma_optimization(10, 2, cma_opts)
+# cma_opts = {'BoundaryHandler': cma.BoundTransform, 'bounds': [0, 10]}
+# result = cma_optimization(10, 2, cma_opts)
 
+units_effort = 2
+arm_effort = 5
+pad_size = 1
+params = [units_effort, arm_effort, pad_size]
+result = optimization(params, iterations = 1, gui = True, random_pos = False)
+
+print("")
 print("----- RESULT -----")
 print(result)
+print("")
 
 p.disconnect()
