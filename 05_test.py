@@ -5,9 +5,19 @@
 
 # debug gripper
 # cma-es
-  # test to see if these values are valid
-  # look at min and max joint positions and the effort
+  # print out the result at each iteration
 # random number seeds: want to control the random positioning in testing
+# next designs:
+  # soft bodies if time permits. Research examples online
+  # best solid body design. Make the unit smaller and more like nubs? 
+
+# watch the simulation run with the really small numbers
+# find code for running FEM specifically
+  # look on the pybullet forum
+# learn gmsh
+  # see what other things it can create
+  # meshlab
+# attach a soft body box to a rigid body box
 
 import pybullet as p
 import time
@@ -15,7 +25,7 @@ import math
 import random
 import numpy as np
 import figures
-from random import random
+import random
 import cma
 
 height = 1.2
@@ -112,9 +122,9 @@ def pick_up():
   # obj.link("obj_body", "box", [0.3,0.3,0.3], 0.2, [0, 0, 0.1], [0, 0, 0])
   return obj
     
-def cma_optimization(iters, num_params, cma_opts):
+def cma_optimization(iters, num_params, sigma, cma_opts):
   # init = np.ones(num_params) * 0.5
-  es = cma.CMAEvolutionStrategy(num_params * [0], 0.5, cma_opts)
+  es = cma.CMAEvolutionStrategy(num_params * [0], sigma, cma_opts)
 
   for k in range(iters):
     X = es.ask()
@@ -122,20 +132,42 @@ def cma_optimization(iters, num_params, cma_opts):
     print("iteration = " + str(k))
     print("")
 
-    es.tell(X, [optimization(x) for x in X])
+    # es.tell(X, [optimization(x) for x in X]) # list comprehension
+
+    quality_values = [run_simulation(x, iterations = 30) for x in X] # print values here
+    print("-----")
+    print("Values: " + str(quality_values))
+    average = 1 - np.average(quality_values)
+    print("Avg: " + str(average))
+    print("-----")
+
+    es.tell(X, quality_values)
+
     if es.stop():
       break
   r = es.result
   return(r[0], r[1])
 
-def optimization(params, iterations = 50, gui = False, random_pos = True):
+def run_simulation(params, iterations = 50, gui = False, random_pos = True):
   iterations = iterations
   success = 0
   failure = 0
 
-  pad_size = 2
+  pad_size = 4
+
+  start = params[0]
+  add = params[1]
+  lower_limit = start
+  upper_limit = start + add
+
+  unit_effort = 1
+  arm_effort = params[2]
+  damping = 0.5
+  friction = 0.5
 
   iteration = 0
+
+  random.seed(10)
 
   while iteration < iterations:
     if (iteration % 10 == 0):
@@ -148,9 +180,12 @@ def optimization(params, iterations = 50, gui = False, random_pos = True):
     my_plane = p.createMultiBody(baseMass = 0, baseCollisionShapeIndex = plane_id, baseVisualShapeIndex = -1)
 
     pad_gripper = 0
-    pad_gripper = gripper(params[2],params[2],0,0.07,params[0],params[1],0.5,0.5)
+    pad_gripper = gripper(pad_size, pad_size, lower_limit, upper_limit, unit_effort, arm_effort, damping, friction)
     fig = pad_gripper.make()
     figure1 = fig.create([0, 0, height], [0, 0, 0])
+
+    right_joint_ind = 3
+    left_joint_ind = 5 + pad_gripper.dim_x * pad_gripper.dim_y
 
     obj = pick_up()
 
@@ -159,17 +194,22 @@ def optimization(params, iterations = 50, gui = False, random_pos = True):
     z = 0.2
 
     if (continuous):
-      rad = random() * 6.283
-      dist = random() * 0.2
+      rad = random.random() * 6.283
+      dist = random.random() * 0.2
       x = math.cos(rad) * dist
       y = math.sin(rad) * dist + 0.375
     else:
-      x = random() * 0.5 - 0.25
-      y = random() * 0.4 - 0.2
+      x = random.random() * 0.5 - 0.25
+      y = random.random() * 0.4 - 0.2
 
     if not random_pos:
       x = 0
       y = 0
+
+    # if (iteration % 5 == 0):
+    #   print("----- pos -----")
+    #   print(x)
+    #   print(y)
 
     obj1 = obj.create([x,y,z], [0,0,0])
 
@@ -200,49 +240,46 @@ def optimization(params, iterations = 50, gui = False, random_pos = True):
           grip_theta_l -= grip_target / 500
           if (continuous):
             p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 100)
-            p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
-            p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
+            p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
+            p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
           else: 
             p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
-            p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
-            p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
+            p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
+            p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
 
             if (pad_gripper.use_units):
-              n = 0
-              while n < (pad_gripper.num_units/2):
-                unit_r = 7 + n
-                unit_l = 7 + n + 1
-
-                force_l = pad_gripper.effort_limit * 3
+              i = 0
+              while i < (pad_gripper.num_units / 2):
+                unit_r = right_joint_ind + i + 2
+                unit_l = left_joint_ind + i + 2
                 p.setJointMotorControl2(figure1, unit_r, p.POSITION_CONTROL, force = pad_gripper.effort_limit)
                 p.setJointMotorControl2(figure1, unit_l, p.POSITION_CONTROL, force = pad_gripper.effort_limit)
-                n += 2 
+                i += 1
       elif (lift_theta < 0 or lift_theta_pris > 0):
         if (continuous):
           lift_theta -= lift_target / 500
           p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 100)
-          p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
-          p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
+          p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
+          p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
         else:
           lift_theta_pris -= lift_target_pris / 500
           p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
-          p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
-          p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
+          p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
+          p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
 
           if (pad_gripper.use_units):
-            n = 0
-            while i < pad_gripper.num_units:
-              unit_r = 7 + n
-              unit_l = 7 + n + 1
-              force_l = pad_gripper.effort_limit * -1
-              p.setJointMotorControl2(figure1, unit_r, p.POSITION_CONTROL, force = pad_gripper.effort_limit)
-              p.setJointMotorControl2(figure1, unit_l, p.POSITION_CONTROL, force = pad_gripper.effort_limit)
-              n += 2 
+            i = 0
+            while i < (pad_gripper.num_units / 2):
+              unit_r = right_joint_ind + i
+              unit_l = left_joint_ind + i
+              # p.setJointMotorControl2(figure1, unit_r, p.POSITION_CONTROL, force = pad_gripper.effort_limit)
+              # p.setJointMotorControl2(figure1, unit_l, p.POSITION_CONTROL, force = pad_gripper.effort_limit)
+              i += 1
 
       p.stepSimulation()
       if gui:
-        # time.sleep(1./10000.)
-        time.sleep(1./240.)
+        time.sleep(1./10000.)
+        # time.sleep(1./240.)
 
     if (p.getBasePositionAndOrientation(obj1)[0][2] > z + 0.1):
       picked_up = True
@@ -254,25 +291,33 @@ def optimization(params, iterations = 50, gui = False, random_pos = True):
     iteration += 1
 
   success_rate = success/(success + failure)
-  return success_rate
+  return (1 - success_rate)
 
   # print("-----")
   # print("Success rate: " + str(success_rate))
 
-# physicsClient = p.connect(p.DIRECT)
+physicsClient = p.connect(p.DIRECT)
 
-physicsClient = p.connect(p.GUI)
-p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
-p.resetDebugVisualizerCamera(cameraDistance=1.2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
+cma_opts = {'BoundaryHandler': cma.BoundTransform, 'bounds': [0, 10]}
+result = cma_optimization(20, 3, 0.1, cma_opts)
 
-# cma_opts = {'BoundaryHandler': cma.BoundTransform, 'bounds': [0, 10]}
-# result = cma_optimization(10, 2, cma_opts)
+# physicsClient = p.connect(p.GUI)
+# p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
+# p.resetDebugVisualizerCamera(cameraDistance=1.2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
 
-units_effort = 2
-arm_effort = 5
-pad_size = 1
-params = [units_effort, arm_effort, pad_size]
-result = optimization(params, iterations = 1, gui = True, random_pos = False)
+# start = 0.2488432
+# add = 0.0179326 
+
+# start = 0
+# add = 0.07
+# effort = 0.18237019
+
+# start = 5.49867916e-04
+# add = 1.45333932e-04
+# effort = 6.36396532e-11
+
+# params = [start, add, effort]
+# result = 1 - run_simulation(params, iterations = 30, gui = True, random_pos = True)
 
 print("")
 print("----- RESULT -----")
