@@ -1,7 +1,16 @@
-# testing:
-  # make the soft and hard gripper equal. Possibly adding pads to the rigid body gripper
-  # make sure to use the same random number seed when testing
-  # visual debugging: save the video maybe? or look into showing one image at one step 
+# debugging:
+  # check the mass of the whole soft body or just a part of it
+    # keep one of the pads soft and the other one a rigid body with the same mass
+    # try an intermediate sized object and see what happens
+    # check the density and update the mass based on the mass and density of the smaller one
+  # asymmetry 
+    # double check the joint indices
+    # check constraint points
+    # switch things 
+# other grippers if the big one doesn't work:
+  # 2+ small pads that are offset a little to make a big pad
+  # orient the pads differently or in different positions/locations
+  # soft pad on one side and rigid pad on the other side
 
 import math
 import time
@@ -31,7 +40,7 @@ def init_soft_body(L, B, H):
   gmsh.model.setPhysicalName(3, 1, "The volume")
 
   gmsh.model.mesh.generate(3)
-  gmsh.write("pad.vtk")
+  gmsh.write("pad_big.vtk")
 
   gmsh.fltk.run()
   gmsh.finalize()
@@ -43,13 +52,13 @@ def soft_body(boxId):
     - Damping: hardness. Bigger = more solid
     """
     # baseOrientation = [ 0, -0.3662725, 0, 0.9305076 ]
-    cubeId = p.loadSoftBody("pad.vtk", basePosition = [-0.15-0.38, -0.05, 1.13-0.15], baseOrientation = [ 0, 0.3989761, 0, 0.9169613 ], 
+    cubeId = p.loadSoftBody("pad_big.vtk", basePosition = [-0.15-0.435, -0.15, 1.13-0.20], baseOrientation = [ 0, 0.3989761, 0, 0.9169613 ], 
                             scale = 1, mass = 0.05, 
                             useNeoHookean = 1, NeoHookeanMu = 600, NeoHookeanLambda = 100, 
                             NeoHookeanDamping = 0.1, useSelfCollision = 1, frictionCoeff = .5, 
                             collisionMargin = 0.001)
 
-    cube2Id = p.loadSoftBody("pad.vtk", basePosition = [0.15+0.35, -0.05, 1.13-0.19], baseOrientation = [ 0, -0.3989761, 0, 0.9169613 ], 
+    cube2Id = p.loadSoftBody("pad_big.vtk", basePosition = [0.15+0.40, -0.15, 1.13-0.235], baseOrientation = [ 0, -0.3989761, 0, 0.9169613 ], 
                             scale = 1, mass = 0.05, 
                             useNeoHookean = 1, NeoHookeanMu = 600, NeoHookeanLambda = 100, 
                             NeoHookeanDamping = 0.1, useSelfCollision = 1, frictionCoeff = .5, 
@@ -67,9 +76,9 @@ def soft_body(boxId):
     p.createSoftBodyAnchor(cube2Id ,7,boxId,3) # 53-56
 
     i = 8
-    while i <= 31:
+    while i <= 35:
       p.createSoftBodyAnchor(cubeId ,i,boxId,5)
-      p.createSoftBodyAnchor(cube2Id ,i+24,boxId,3)
+      p.createSoftBodyAnchor(cube2Id ,i+28,boxId,3)
       i += 1
 
 class gripper():
@@ -96,6 +105,8 @@ class gripper():
     fig.link("right_forearm", "box", [length, w, w], 0.2, [length * 0.5, 0, 0], [0, 0, 0])
     fig.link("left_arm", "box", [length, w, w], 0.2, [-length * 0.5, 0, 0], [0, 0, 0])
     fig.link("left_forearm", "box", [length, w, w], 0.2, [-1 * length * 0.5, 0, 0], [0, 0, 0])
+    fig.link("left_pad", "box", [0.35, 0.35, 0.01], 0.2, [-0.11,0,0], [0,0,0])
+    fig.link("right_pad", "box", [0.35, 0.35, 0.01], 0.2, [0.11,0,0], [0,0,0])
 
     fig.joint("stand_arm_joint", "body", "stand_arm", "fixed", [0,w + arm_length,0], [0, 0, 0], [0.5, 1.25, 0], [0,0,0])
     if (continuous):
@@ -110,7 +121,10 @@ class gripper():
 
     fig.joint("left_joint", "body", "left_arm", "continuous", [-w, 0, 0], [0, 0, 0], [0, -1, 0], [0,0,0])
     fig.joint("left_forearm_joint", "left_arm", "left_forearm", "fixed", [-length, 0, 0], [0, self.arm_angle * -1, 0], [0, 1, 0], [0,0,0])
-
+    
+    fig.joint("left_pad_joint", "left_forearm", "left_pad", "fixed", [-0.05,0,-0.05], [0,0,0], [0,0,0], [0,0,0])
+    fig.joint("right_pad_joint", "right_forearm", "right_pad", "fixed", [0.05,0,-0.05], [0,0,0], [0,0,0], [0,0,0])
+    
     return fig
 
 def pick_up():
@@ -177,7 +191,7 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
     figure1 = fig.create([0, 0, height], [0, 0, 0])
 
     print(figure1)
-    # init_soft_body(0.05, 0.1, 0.2)
+    init_soft_body(0.05, 0.3, 0.3)
 
     soft_body(figure1)
     soft_body(figure1)
@@ -198,8 +212,8 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
       y = random.random() * 0.4 - 0.2
 
     if not random_pos:
-      x = -0.16681812710337623
-      y = 0.12297990080990229
+      x = 0
+      y = 0
 
     obj1 = obj.create([x,y,z], [0,0,0])
 
@@ -215,6 +229,9 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
     lift_theta_pris = 0
     lift_target_pris = 0.5
 
+    right_joint_ind = 3
+    left_joint_ind = 6
+
     p.setTimeStep(0.0005)
 
     for i in range (0,2000):
@@ -224,35 +241,35 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
         if (continuous):
           lift_theta += lift_target / 500
           p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 100)
-          p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
-          p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
+          p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
+          p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
         else:
           lift_theta_pris += lift_target_pris / 500
           p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
-          p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
-          p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
+          p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
+          p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
       elif (501 <= i <= 1000):
           grip_theta += grip_target / 500
           grip_theta_l -= grip_target / 500
           if (continuous):
             p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 100)
-            p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
-            p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
+            p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
+            p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
           else: 
             p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
-            p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
-            p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
+            p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
+            p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
       elif (lift_theta < 0 or lift_theta_pris > 0):
         if (continuous):
           lift_theta -= lift_target / 500
           p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 100)
-          p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
-          p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = 100)
+          p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
+          p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
         else:
           lift_theta_pris -= lift_target_pris / 500
           p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 200)
-          p.setJointMotorControl2(figure1, 3, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
-          p.setJointMotorControl2(figure1, 5, p.POSITION_CONTROL, targetPosition = grip_theta, force = pad_gripper.arm_effort)
+          p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
+          p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
 
       p.stepSimulation()
       # if gui:
@@ -276,18 +293,17 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
   # print("-----")
   # print("Success rate: " + str(success_rate))
 
-physicsClient = p.connect(p.DIRECT)
+# physicsClient = p.connect(p.DIRECT)
 
 # cma_opts = {'BoundaryHandler': cma.BoundTransform, 'bounds': [0, 10]}
 # result = cma_optimization(20, 3, 0.1, cma_opts)
 
-# physicsClient = p.connect(p.GUI)
-# p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
-# p.resetDebugVisualizerCamera(cameraDistance=2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
+physicsClient = p.connect(p.GUI)
+p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
+p.resetDebugVisualizerCamera(cameraDistance=2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
 
-# 45.99%
 params = [0.75]
-result = 1 - run_simulation(params, iterations = 50, gui = False, random_pos = True)
+result = 1 - run_simulation(params, iterations = 1, gui = True, random_pos = False)
 
 print("")
 print("----- RESULT -----")

@@ -5,7 +5,7 @@ gmsh.initialize()
 
 gmsh.model.add("DFG 3D")
 
-L, B, H = 0.05, 0.1, 0.2
+L, B, H = 1,1,1
 channel = gmsh.model.occ.addBox(0, 0, 0, L, B, H)
 
 # gmsh.option.setNumber("Mesh.Algorithm3D", 1)

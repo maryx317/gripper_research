@@ -1,24 +1,3 @@
-# meters kilograms seconds
-# cm grams seconds
-
-# pad: 2 | effort: 2 | success: 88%
-
-# debug gripper
-# cma-es
-  # print out the result at each iteration
-# random number seeds: want to control the random positioning in testing
-# next designs:
-  # soft bodies if time permits. Research examples online
-  # best solid body design. Make the unit smaller and more like nubs? 
-
-# watch the simulation run with the really small numbers
-# find code for running FEM specifically
-  # look on the pybullet forum
-# learn gmsh
-  # see what other things it can create
-  # meshlab
-# attach a soft body box to a rigid body box
-
 import pybullet as p
 import time
 import math
@@ -64,6 +43,8 @@ class gripper():
     fig.link("right_forearm", "box", [length, w, w], 0.2, [length * 0.5, 0, 0], [0, 0, 0])
     fig.link("left_arm", "box", [length, w, w], 0.2, [-length * 0.5, 0, 0], [0, 0, 0])
     fig.link("left_forearm", "box", [length, w, w], 0.2, [-1 * length * 0.5, 0, 0], [0, 0, 0])
+    fig.link("left_pad", "box", [0.3, 0.3, 0.05], 0.2, [-0.11,0,0], [0,0,0])
+    fig.link("right_pad", "box", [0.3, 0.3, 0.05], 0.2, [0.11,0,0], [0,0,0])
 
     fig.joint("stand_arm_joint", "body", "stand_arm", "fixed", [0,w + arm_length,0], [0, 0, 0], [0.5, 1.25, 0], [0,0,0])
     if (continuous):
@@ -78,6 +59,9 @@ class gripper():
 
     fig.joint("left_joint", "body", "left_arm", "continuous", [-w, 0, 0], [0, 0, 0], [0, -1, 0], [0,0,0])
     fig.joint("left_forearm_joint", "left_arm", "left_forearm", "fixed", [-length, 0, 0], [0, -0.75, 0], [0, 1, 0], [0,0,0])
+
+    fig.joint("left_pad_joint", "left_forearm", "left_pad", "fixed", [-0.05,0,-0.09], [0,0,0], [0,0,0], [0,0,0])
+    fig.joint("right_pad_joint", "right_forearm", "right_pad", "fixed", [0.05,0,-0.09], [0,0,0], [0,0,0], [0,0,0])
 
     if (self.use_units):
       weight = 0.64 / self.num_units
@@ -185,7 +169,7 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
     figure1 = fig.create([0, 0, height], [0, 0, 0])
 
     right_joint_ind = 3
-    left_joint_ind = 5 + pad_gripper.dim_x * pad_gripper.dim_y
+    left_joint_ind = 6 + pad_gripper.dim_x * pad_gripper.dim_y
 
     obj = pick_up()
 
@@ -203,8 +187,8 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
       y = random.random() * 0.4 - 0.2
 
     if not random_pos:
-      x = 0
-      y = 0
+      x = -0.16681812710337623
+      y = 0.12297990080990229
 
     # if (iteration % 5 == 0):
     #   print("----- pos -----")
@@ -278,15 +262,17 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
 
       p.stepSimulation()
       if gui:
-        time.sleep(1./10000.)
-        # time.sleep(1./240.)
+        # time.sleep(1./10000.)
+        time.sleep(1./240.)
 
     if (p.getBasePositionAndOrientation(obj1)[0][2] > z + 0.1):
       picked_up = True
       success += 1
+      # print("Success at: " + str(x) + ", " + str(y))
     else:
       picked_up = False
       failure += 1
+      # print("Failure at: " + str(x) + ", " + str(y))
 
     iteration += 1
 
@@ -296,28 +282,31 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
   # print("-----")
   # print("Success rate: " + str(success_rate))
 
-physicsClient = p.connect(p.DIRECT)
+# physicsClient = p.connect(p.DIRECT)
 
 # cma_opts = {'BoundaryHandler': cma.BoundTransform, 'bounds': [0, 10]}
 # result = cma_optimization(20, 3, 0.1, cma_opts)
 
-# physicsClient = p.connect(p.GUI)
-# p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
-# p.resetDebugVisualizerCamera(cameraDistance=1.2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
+physicsClient = p.connect(p.GUI)
+p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
+p.resetDebugVisualizerCamera(cameraDistance=1.2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
 
 # start = 0.2488432
 # add = 0.0179326 
 
-start = 0
-add = 0.07
-effort = 0.18237019
+# start = 0
+# add = 0.07
+# effort = 0.18237019
 
-# start = 5.49867916e-04
-# add = 1.45333932e-04
-# effort = 6.36396532e-11
+start = 5.49867916e-04
+add = 1.45333932e-04
+effort = 6.36396532e-11
 
 params = [start, add, effort]
-result = 1 - run_simulation(params, iterations = 50, gui = False, random_pos = True)
+
+# 32%: small pad 
+# 74%: big pad
+result = 1 - run_simulation(params, iterations = 1, gui = True, random_pos = True)
 
 print("")
 print("----- RESULT -----")
