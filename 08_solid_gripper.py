@@ -265,7 +265,7 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
         # time.sleep(1./10000.)
         time.sleep(1./240.)
 
-    if (p.getBasePositionAndOrientation(obj1)[0][2] > z + 0.1):
+    if (p.getBasePositionAndOrientation(obj1)[0][2] > z + 0.3):
       picked_up = True
       success += 1
       # print("Success at: " + str(x) + ", " + str(y))

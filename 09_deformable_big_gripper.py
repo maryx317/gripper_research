@@ -1,4 +1,4 @@
-# debugging:
+# debugging (fixed!):
   # check the mass of the whole soft body or just a part of it
     # keep one of the pads soft and the other one a rigid body with the same mass
     # try an intermediate sized object and see what happens
@@ -11,6 +11,7 @@
   # 2+ small pads that are offset a little to make a big pad
   # orient the pads differently or in different positions/locations
   # soft pad on one side and rigid pad on the other side
+# share code with Turk
 
 import math
 import time
@@ -52,33 +53,33 @@ def soft_body(boxId):
     - Damping: hardness. Bigger = more solid
     """
     # baseOrientation = [ 0, -0.3662725, 0, 0.9305076 ]
-    cubeId = p.loadSoftBody("pad_big.vtk", basePosition = [-0.15-0.435, -0.15, 1.13-0.20], baseOrientation = [ 0, 0.3989761, 0, 0.9169613 ], 
-                            scale = 1, mass = 0.05, 
+    cube2Id = p.loadSoftBody("pad_big.vtk", basePosition = [0.15+0.40, -0.15, 1.13-0.235], baseOrientation = [ 0, -0.3989761, 0, 0.9169613 ], 
+                            scale = 1, mass = 0.1, 
                             useNeoHookean = 1, NeoHookeanMu = 600, NeoHookeanLambda = 100, 
                             NeoHookeanDamping = 0.1, useSelfCollision = 1, frictionCoeff = .5, 
                             collisionMargin = 0.001)
-
-    cube2Id = p.loadSoftBody("pad_big.vtk", basePosition = [0.15+0.40, -0.15, 1.13-0.235], baseOrientation = [ 0, -0.3989761, 0, 0.9169613 ], 
-                            scale = 1, mass = 0.05, 
+    
+    cubeId = p.loadSoftBody("pad_big.vtk", basePosition = [-0.15-0.42, -0.15, 1.13-0.20], baseOrientation = [ 0, 0.3989761, 0, 0.9169613 ], 
+                            scale = 1, mass = 0.1, 
                             useNeoHookean = 1, NeoHookeanMu = 600, NeoHookeanLambda = 100, 
                             NeoHookeanDamping = 0.1, useSelfCollision = 1, frictionCoeff = .5, 
                             collisionMargin = 0.001)
 
     # ----- corners -----
-    p.createSoftBodyAnchor(cubeId ,0,boxId,5)
-    p.createSoftBodyAnchor(cubeId ,1,boxId,5)
-    p.createSoftBodyAnchor(cubeId ,2,boxId,5)
-    p.createSoftBodyAnchor(cubeId ,3,boxId,5)
-
     p.createSoftBodyAnchor(cube2Id ,4,boxId,3) # 33-40
     p.createSoftBodyAnchor(cube2Id ,5,boxId,3) # 41-44
     p.createSoftBodyAnchor(cube2Id ,6,boxId,3) # 45-52
     p.createSoftBodyAnchor(cube2Id ,7,boxId,3) # 53-56
 
+    p.createSoftBodyAnchor(cubeId ,0,boxId,5)
+    p.createSoftBodyAnchor(cubeId ,1,boxId,5)
+    p.createSoftBodyAnchor(cubeId ,2,boxId,5)
+    p.createSoftBodyAnchor(cubeId ,3,boxId,5)
+
     i = 8
     while i <= 35:
-      p.createSoftBodyAnchor(cubeId ,i,boxId,5)
       p.createSoftBodyAnchor(cube2Id ,i+28,boxId,3)
+      p.createSoftBodyAnchor(cubeId ,i,boxId,5)
       i += 1
 
 class gripper():
@@ -105,8 +106,11 @@ class gripper():
     fig.link("right_forearm", "box", [length, w, w], 0.2, [length * 0.5, 0, 0], [0, 0, 0])
     fig.link("left_arm", "box", [length, w, w], 0.2, [-length * 0.5, 0, 0], [0, 0, 0])
     fig.link("left_forearm", "box", [length, w, w], 0.2, [-1 * length * 0.5, 0, 0], [0, 0, 0])
-    fig.link("left_pad", "box", [0.35, 0.35, 0.01], 0.2, [-0.11,0,0], [0,0,0])
-    fig.link("right_pad", "box", [0.35, 0.35, 0.01], 0.2, [0.11,0,0], [0,0,0])
+    # fig.link("left_pad", "box", [0.35, 0.35, 0.01], 0.2, [-0.11,0,0], [0,0,0])
+    # fig.link("right_pad", "box", [0.35, 0.35, 0.01], 0.2, [0.11,0,0], [0,0,0])
+
+    # fig.link("left_pad2", "box", [0.3, 0.3, 0.05], 0.2, [-0.11,0,0], [0,0,0])
+    # fig.link("right_pad2", "box", [0.3, 0.3, 0.05], 0.05, [0.11,0,0], [0,0,0])
 
     fig.joint("stand_arm_joint", "body", "stand_arm", "fixed", [0,w + arm_length,0], [0, 0, 0], [0.5, 1.25, 0], [0,0,0])
     if (continuous):
@@ -122,9 +126,12 @@ class gripper():
     fig.joint("left_joint", "body", "left_arm", "continuous", [-w, 0, 0], [0, 0, 0], [0, -1, 0], [0,0,0])
     fig.joint("left_forearm_joint", "left_arm", "left_forearm", "fixed", [-length, 0, 0], [0, self.arm_angle * -1, 0], [0, 1, 0], [0,0,0])
     
-    fig.joint("left_pad_joint", "left_forearm", "left_pad", "fixed", [-0.05,0,-0.05], [0,0,0], [0,0,0], [0,0,0])
-    fig.joint("right_pad_joint", "right_forearm", "right_pad", "fixed", [0.05,0,-0.05], [0,0,0], [0,0,0], [0,0,0])
-    
+    # fig.joint("left_pad_joint", "left_forearm", "left_pad", "fixed", [-0.05,0,-0.05], [0,0,0], [0,0,0], [0,0,0])
+    # fig.joint("right_pad_joint", "right_forearm", "right_pad", "fixed", [0.05,0,-0.05], [0,0,0], [0,0,0], [0,0,0])
+
+    # fig.joint("left_pad2_joint", "left_forearm", "left_pad2", "fixed", [-0.05,0,-0.09], [0,0,0], [0,0,0], [0,0,0])
+    # fig.joint("right_pad2_joint", "right_forearm", "right_pad2", "fixed", [0.05,0,-0.09], [0,0,0], [0,0,0], [0,0,0])
+
     return fig
 
 def pick_up():
@@ -171,7 +178,7 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
 
   iteration = 0
 
-  random.seed(10)
+  random.seed(9)
 
   while iteration < iterations:
     if (iteration % 10 == 0):
@@ -190,11 +197,14 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
     fig = pad_gripper.make()
     figure1 = fig.create([0, 0, height], [0, 0, 0])
 
-    print(figure1)
-    init_soft_body(0.05, 0.3, 0.3)
+    # init_soft_body(0.05, 0.3, 0.3)
 
     soft_body(figure1)
-    soft_body(figure1)
+
+    # # print the joints and their indices
+    # for i in range(7):
+    #   joint_info = p.getJointInfo (figure1, i)
+    #   print ("joint " + str(i) + " " + str(joint_info[1]))
 
     obj = pick_up()
 
@@ -212,8 +222,8 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
       y = random.random() * 0.4 - 0.2
 
     if not random_pos:
-      x = 0
-      y = 0
+      x = -0.1366470703094756
+      y = 0.18491801433375316
 
     obj1 = obj.create([x,y,z], [0,0,0])
 
@@ -230,14 +240,14 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
     lift_target_pris = 0.5
 
     right_joint_ind = 3
-    left_joint_ind = 6
+    left_joint_ind = 5
 
-    p.setTimeStep(0.0005)
+    p.setTimeStep(0.0001)
 
-    for i in range (0,2000):
+    for i in range (0,6000):
       t += 0.3
 
-      if (0 <= i <= 500):
+      if (0 <= i <= 1000):
         if (continuous):
           lift_theta += lift_target / 500
           p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 100)
@@ -248,9 +258,9 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
           p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 100)
           p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
           p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
-      elif (501 <= i <= 1000):
+      elif (1001 <= i <= 1500):
           grip_theta += grip_target / 500
-          grip_theta_l -= grip_target / 500
+          # grip_theta_l -= grip_target / 500
           if (continuous):
             p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta, force = 100)
             p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
@@ -267,7 +277,7 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
           p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
         else:
           lift_theta_pris -= lift_target_pris / 500
-          p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 200)
+          p.setJointMotorControl2(figure1, 1, p.POSITION_CONTROL, targetPosition = lift_theta_pris, force = 300)
           p.setJointMotorControl2(figure1, right_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
           p.setJointMotorControl2(figure1, left_joint_ind, p.POSITION_CONTROL, targetPosition = grip_theta, force = 200)
 
@@ -276,7 +286,7 @@ def run_simulation(params, iterations = 50, gui = False, random_pos = True):
         # time.sleep(1./10000.)
         # time.sleep(1./240.)
 
-    if (p.getBasePositionAndOrientation(obj1)[0][2] > z + 0.1):
+    if (p.getBasePositionAndOrientation(obj1)[0][2] > z + 0.3):
       picked_up = True
       success += 1
       print("Success at: " + str(x) + ", " + str(y))
@@ -302,8 +312,9 @@ physicsClient = p.connect(p.GUI)
 p.configureDebugVisualizer(p.COV_ENABLE_GUI,0)
 p.resetDebugVisualizerCamera(cameraDistance=2, cameraYaw=0, cameraPitch=-30, cameraTargetPosition=[0,0,0.2])
 
+# 90-94% success rate!
 params = [0.75]
-result = 1 - run_simulation(params, iterations = 1, gui = True, random_pos = False)
+result = 1 - run_simulation(params, iterations = 50, gui = False, random_pos = True)
 
 print("")
 print("----- RESULT -----")
