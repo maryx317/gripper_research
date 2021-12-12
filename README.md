@@ -1,3 +1,3 @@
 # Fall 2021 Gripper Research 
 
-<video src="https://drive.google.com/file/d/1uCfbzQuyYQlM2ran1sw1y2VvNXj0LA_I/view?usp=sharing" width="320" height="200" controls preload></video>
+![soft_gripper_big_pad](https://user-images.githubusercontent.com/30352267/145732743-274c8a03-f658-4b46-ac99-0da80ab5dafe.gif)
