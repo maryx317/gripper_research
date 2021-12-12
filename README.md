@@ -7,4 +7,4 @@
 ![soft_gripper_small_pad](https://user-images.githubusercontent.com/30352267/145732870-f9e7a1f6-124f-4c54-983e-384a35023753.gif)
 
 ![solid_gripper_big_pad](https://user-images.githubusercontent.com/30352267/145732877-193d0b82-7a3c-4a65-96a1-48f6404316ee.gif)
-![soft_gripper_big_pad](https://user-images.githubusercontent.com/30352267/145732743-274c8a03-f658-4b46-ac99-0da80ab5dafe.gif)
+![soft_gripper_big_pad](https://user-images.githubusercontent.com/30352267/145732956-3c982f84-6021-4bc3-b883-5edd97204bbc.gif)
