@@ -17,7 +17,7 @@ In setting this gripper up, I also created a way to evaluate the grippers. When 
 With this evaluation method, this basic simple gripper had a success rate of 27%.
 
 ![solid_gripper_0_units](https://user-images.githubusercontent.com/30352267/145732871-fd206295-1444-4643-bb89-6523de294f72.gif)
-
+    
 ### Solution 1: solid body units
 The first solution includes adding units to the arms of the gripper. The concept here is to increase the number of contact points the gripper has to the ball. The units are controlled with a prismatic joint that allows them to be pushed into the arm of the gripper, much like how human flesh works. 
 
@@ -30,10 +30,12 @@ Here, I also attempted to use CMA-ES optimization to optimize various parameters
 
 Surprisingly, the optimization of these all ended out to be 0. 
 
-2x2 sets of units: 75% success rate  
-![solid_gripper_2_units](https://user-images.githubusercontent.com/30352267/145732872-f939aa01-8458-4d7c-a426-f9073e345b64.gif)
+2x2 sets of units: 75% success rate
 
+![solid_gripper_2_units](https://user-images.githubusercontent.com/30352267/145732872-f939aa01-8458-4d7c-a426-f9073e345b64.gif)
+    
 4x4 sets of units: 76% success rate
+
 ![solid_gripper_4_units](https://user-images.githubusercontent.com/30352267/145732874-9534f7a2-721c-4de1-be72-de6f9d8562d5.gif)
 
 #### Conclusion
@@ -47,14 +49,17 @@ Here, I tested two different sized pads, one small thin one and one bigger pad. 
 Solid body gripper with a small pad: 32% success rate
 
 Soft body gripper with a small pad: 45.99% success rate
+
 ![soft_gripper_small_pad](https://user-images.githubusercontent.com/30352267/145732870-f9e7a1f6-124f-4c54-983e-384a35023753.gif)
-
+    
 Solid body gripper with a big pad: 74% success rate
+
 ![solid_gripper_big_pad](https://user-images.githubusercontent.com/30352267/145732877-193d0b82-7a3c-4a65-96a1-48f6404316ee.gif)
-
+    
 Soft body gripper with a big pad: 90-94% success rate
-![soft_gripper_big_pad](https://user-images.githubusercontent.com/30352267/145732956-3c982f84-6021-4bc3-b883-5edd97204bbc.gif)
 
+![soft_gripper_big_pad](https://user-images.githubusercontent.com/30352267/145732956-3c982f84-6021-4bc3-b883-5edd97204bbc.gif)
+    
 #### Conclusion
 As seen in the success rates here, soft bodies definitely improved the success rate of the gripper. The big pad even had a 90+% success rate. The only reason why it did not have 100% success rate is that some of the randomly placed balls were too far for the gripper to fully grab onto. To solve this, a possible solution would be an even bigger pad. 
 
