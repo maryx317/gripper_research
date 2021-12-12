@@ -48,6 +48,8 @@ Here, I tested two different sized pads, one small thin one and one bigger pad. 
 
 Solid body gripper with a small pad: 32% success rate
 
+![solid_gripper_small_pad](https://user-images.githubusercontent.com/30352267/145734445-081e5abe-c4b2-46f5-9b8b-2d7651300502.gif)
+    
 Soft body gripper with a small pad: 45.99% success rate
 
 ![soft_gripper_small_pad](https://user-images.githubusercontent.com/30352267/145732870-f9e7a1f6-124f-4c54-983e-384a35023753.gif)
