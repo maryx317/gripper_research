@@ -23,7 +23,7 @@ The first solution includes adding units to the arms of the gripper. The concept
 
 In this section, I tested pad sizes of 1x1, 2x2, 3x3, and 4x4 sets of units. Reference the two GIFS below for the grippers with 2x2 and 4x4 sets of units. 
 
-**Optimization**
+#### Optimization
 Here, I also attempted to use CMA-ES optimization to optimize various parameters of the gripper. The three that I specifically optimized were:
 - How much the units could move into the arm
 - Effort (amount of force) of the arm that grabs the ball
@@ -36,7 +36,7 @@ Surprisingly, the optimization of these all ended out to be 0.
 4x4 sets of units: 76% success rate
 ![solid_gripper_4_units](https://user-images.githubusercontent.com/30352267/145732874-9534f7a2-721c-4de1-be72-de6f9d8562d5.gif)
 
-**Conclusion**
+#### Conclusion
 Compared to the 27% success rate of the base gripper with no units, the success rate of this solution shows that this solution was pretty successful. Increasing the amount of contact points the gripper has to the ball does increase the success rate quite a bit. 
 
 ### Solution 2: soft body pads
@@ -55,7 +55,7 @@ Solid body gripper with a big pad: 74% success rate
 Soft body gripper with a big pad: 90-94% success rate
 ![soft_gripper_big_pad](https://user-images.githubusercontent.com/30352267/145732956-3c982f84-6021-4bc3-b883-5edd97204bbc.gif)
 
-**Conclusion** 
+#### Conclusion
 As seen in the success rates here, soft bodies definitely improved the success rate of the gripper. The big pad even had a 90+% success rate. The only reason why it did not have 100% success rate is that some of the randomly placed balls were too far for the gripper to fully grab onto. To solve this, a possible solution would be an even bigger pad. 
 
 Either way, this provides a good direction to go in improving grip in physics simulators.
