@@ -30,7 +30,7 @@ Here, I also attempted to use CMA-ES optimization to optimize various parameters
 
 Surprisingly, the optimization of these all ended out to be 0. 
 
-2x2 sets of units: 75% success rate
+2x2 sets of units: 75% success rate /n
 ![solid_gripper_2_units](https://user-images.githubusercontent.com/30352267/145732872-f939aa01-8458-4d7c-a426-f9073e345b64.gif)
 
 4x4 sets of units: 76% success rate
